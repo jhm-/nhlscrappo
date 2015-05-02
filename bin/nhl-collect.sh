@@ -21,8 +21,8 @@
 
 docroot="http://www.nhl.com/scores/htmlreports"
 
-# For the 2007-2008 to 2014-2015 regular seasons
-# [note that the 2012-2013 NHL lockout season was a short one (720 games)]
+# For the 2007-2008 to 2014-2015 regular seasons:
+# [Note that the 2012-2013 NHL lockout season was a short one (720 games)]
 for i in {7..14}
 do
   x=0$((i))
