@@ -56,3 +56,53 @@ class RosterParser(ReportFetcher):
         # The home scratch table is the sixth table
         td = [data for data in self.soup.find_all("td", {"width":"50%"})][5]
         self.__fill_roster_entity(td, self.scratches["home"])
+
+    def load_coaches(self):
+        td = [data for data in self.soup.find_all("td", {"width":"50%"})]
+        # The coaches tables are the seventh and eigth tables
+        for i, cell in enumerate(td[6:8]):
+            keys = ["home", "away"]
+            tr = cell.find_all("tr")
+            self.coaches[keys[i]] = tr[0].find("td").string
+
+    def __get_num(self, s):
+        s = s.replace("#", "").strip()
+        return int(s) if s.isdigit() else -1
+
+    def __num_name(self, s):
+        s = s.split(" ")
+        if len(s) > 1:
+            num = self.__get_num(s[0])
+            name = " ".join(si.strip() for si in s[1:])
+        else:
+            num = __get_num(s) if "#" in s else -1
+            name = s if num == -1 else ""
+        return num, name
+
+    def __make_dict(self, o):
+        d = {}
+
+        for oi in o:
+            num, name = self.__num_name(oi)
+            if num in d:
+                num = max(d.keys() + 1)
+            d[num] = name
+            return d
+
+    def load_officials(self):
+        td = [data for data in self.soup.find_all("td", {"width":"100%"})]
+        tr = [cell for cell in td[2].find_all("tr", {"valign":"top","id":""})]
+        ltd = [cell for cell in tr[0].find_all("td", {"align":"left"})]
+        referees = [ref.string for ref in ltd[0].find_all("td")]
+        self.officials["refs"] = self.__make_dict(referees)
+        # English format:
+        if referees:
+            linesmen = [lm.string for lm in ltd[3].find_all("td")]
+            self.officials["linesmen"] = self.__make_dict(linesmen)
+        # French format:
+        else:
+            referees = [ltd[0].string, ltd[1].string]
+            self.officials["refs"] = self.__make_dict(referees)
+            ltd = [cell for cell in tr[0].find_all("td", {"align":"center"})]
+            linesmen = [ltd[5].string, ltd[6].string]
+            self.officials["linesmen"] = self.__make_dict(linesmen)

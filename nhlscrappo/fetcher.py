@@ -19,7 +19,7 @@
 # SOFTWARE.
 
 from bs4 import BeautifulSoup
-from urllib.request import urlopen
+from urllib.request import urlopen, Request
 import nhlscrappo.constants as C
 from nhlscrappo import GameType, ReportType
 
@@ -37,7 +37,17 @@ class ReportFetcher(object):
 
     def __load_html(self, url):
         if "http://" in url:
-            with urlopen(url) as handle:
+            req = Request(url, headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) " \
+                    "AppleWebKit/537.36 (KHTML, like Gecko) " \
+                    "Chrome/42.0.2311.135 Safari/537.36", \
+                "Accept": "text/html,application/xhtml+xml,application/" \
+                    "xml;q=0.9,*/*;q=0.8", \
+                "Accept-Charset": "ISO-8859-1,utf-8;q=0.7,*;q=0.3", \
+                "Accept-Encoding": "none", \
+                "Accept-Language": "en-US,en;q=0.8", \
+                "Connection": "keep-alive"})
+            with urlopen(req) as handle:
                 html = handle.read()
                 handle.close()
         else:
