@@ -24,37 +24,37 @@ import nhlscrappo.constants as C
 from nhlscrappo import GameType, ReportType
 
 class ReportFetcher(object):
-    """Responsible for fetching and validating the report"""
+    """Responsible for fetching and validating the report fields"""
 
     __docroot = "http://www.nhl.com/"
 
-    def __init__(self, season = C.MIN_SEASON, game_num = 1, game_type = \
-            GameType.Regular, report_type = ReportType.Summary):
-        self.__html = None
+    def __init__(self, season, game_num, game_type, report_type):
         self.season = season
         self.game_num = game_num
         self.game_type = game_type
         self.report_type = report_type
+        self.soup = None
 
-    def load(self, local = None):
+    def __load_html(self, url):
+        if "http://" in url:
+            with urlopen(url) as handle:
+                html = handle.read()
+                handle.close()
+        else:
+            with open(url, "r") as handle:
+                html = handle.read()
+                handle.close()
+        return BeautifulSoup(html.decode("utf-8"))
+
+    def make_soup(self, local = None):
         if local:
             soup = self.__load_html(local)
         else:
             url = self.__docroot + "scores/htmlreports/" + str(self.season) + \
                 str(self.season + 1) + "/" + self.report_type.value + "0" + \
                 str(self.game_type.value) + ("%04i" % self.game_num) + ".HTM"
-            soup = self.__load_html(url)
-
-    def __load_html(self, url):
-        if "http://" in url:
-            with urlopen(url) as handle:
-                self.__html = handle.read()
-                handle.close()
-        else:
-            with open(url, "r") as handle:
-                self.__html = handle.read()
-                handle.close()
-        return BeautifulSoup(self.__html.decode("utf-8"))
+            self.soup = self.__load_html(url)
+        return self.soup
 
     @property
     def season(self):
@@ -69,6 +69,16 @@ class ReportFetcher(object):
                 str(C.MIN_SEASON) + " until " + str(C.MAX_SEASON) + \
                 " are supported")
         self._season = int(value)
+
+    @property
+    def game_num(self):
+        return self._game_num
+
+    @game_num.setter
+    def game_num(self, value):
+        if not isinstance(value, int):
+            raise TypeError("game_num must be of type int")
+        self._game_num = value
 
     @property
     def game_type(self):
@@ -93,11 +103,11 @@ class ReportFetcher(object):
             raise TypeError("report_type must be of type ReportType")
 
     @property
-    def game_num(self):
-        return self._game_num
+    def soup(self):
+        return self._soup
 
-    @game_num.setter
-    def game_num(self, value):
-        if not isinstance(value, int):
-            raise TypeError("game_num must be of type int")
-        self._game_num = value
+    @soup.setter
+    def soup(self, value):
+        if value is not None and not isinstance(value, BeautifulSoup):
+            raise TypeError("soup must be of type BeautifulSoup")
+        self._soup = value
