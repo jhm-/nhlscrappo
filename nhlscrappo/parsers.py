@@ -22,13 +22,23 @@ from nhlscrappo import ReportType
 from nhlscrappo.fetcher import ReportFetcher
 
 class RosterParser(ReportFetcher):
+    """Parse the roster report and fill appropriate fields"""
+
     def __init__(self, season, game_num, game_type):
         super(RosterParser, self).__init__(season, game_num, game_type, \
             ReportType.Roster)
-        self.rosters = {"home":{}, "away":{}}
-        self.scratches = {"home":{}, "away":{}}
-        self.coaches = {"home":{}, "away":{}}
-        self.officials = {"refs":{}, "linesmen":{}}
+
+        self.rosters = {"home": {}, "away": {}}
+        """Player rosters {"home/away": {name: {"num", "pos"}}}"""
+
+        self.scratches = {"home": {}, "away": {}}
+        """Healthy scratches {"home/away": {name: {"num", "pos"}}}"""
+        
+        self.coaches = {"home": {}, "away": {}}
+        """Team coaches {"home/away": name}"""
+        
+        self.officials = {"refs": {}, "linesmen": {}}
+        """Game officials {"refs/linesmen": {number: name}}"""
 
     def __fill_roster_entity(self, td, players):
         tr = td.find_all("tr")
@@ -106,3 +116,88 @@ class RosterParser(ReportFetcher):
             ltd = [cell for cell in tr[0].find_all("td", {"align":"center"})]
             linesmen = [ltd[5].string, ltd[6].string]
             self.officials["linesmen"] = self.__make_dict(linesmen)
+
+class ShotParser(ReportFetcher):
+    """Parse the shot summary report and fill appropriate fields"""
+
+    def __init__(self, season, game_num, game_type):
+        super(ShotParser, self).__init__(season, game_num, game_type, \
+            ReportType.Shots)
+
+        self.shots = {"away": {}, "home": {}}
+        """
+        Player shot summary statistics
+        {"home/away": {name: {period: {"EV", "PP", "SH", "TOT"}}}}
+        """
+
+    def __make_list(self, i):
+        keys = ["EV", "PP", "SH", "TOT"]
+
+        j = [k for k in i.find_all("td")]
+        # l is a list of 5 entities, with the first being the period and the
+        # remaining 4 corresponding to the above keys
+        l = [p.string for p in j]
+        l = [u.replace(u"\xa0", u"") for u in l]
+        # A "TOT" rather than a number signifies the end of the statistics for
+        # this player
+        if l[0] == "TOT":
+            return None
+        # Create a list where the first entity is the period and the second
+        # entity is a dictionary containing the stats
+        return  [l[0], dict(zip(keys, l[1:]))]
+
+    def __period_dict(self, stat):
+        summary = {}
+
+        # Create a dictionary and assign statistics to a keyed period number
+        for split in stat:
+            split[0] = "4" if split[0] == "OT" else split[0]
+            summary[int(split[0])] = split[1]
+        return summary
+
+    def __fill_shots_entity(self, table):
+        player_names = []
+        player_stats = []
+        pstat = []
+
+        tr = [cell for cell in table[3].find_all("tr")]
+        # The first list we generate is for the player names
+        for i in tr:
+            if not i.attrs:
+                ptd = [cell for cell \
+                    in i.find_all("td", {"align":"center", "class":""})]
+                if len(ptd) > 2:
+                    name = " ".join([ptd[1].string, ptd[2].string])
+                    player_names.append(name)
+        # The second list we generate is for the player statistics
+        for i in tr:
+            evenColor = [cell for cell \
+                in i.find_all("tr", {"class":"evenColor"})]
+            oddColor = [cell for cell \
+                in i.find_all("tr", {"class":"oddColor"})]
+            if oddColor:
+                for line in oddColor:
+                    p = self.__make_list(line)
+                    if p is not None:
+                        pstat.append(p)
+                    else:
+                        player_stats.append(self.__period_dict(pstat))
+                        pstat = []
+            if evenColor:
+                for line in evenColor:
+                    p = self.__make_list(line)
+                    if p is not None:
+                        pstat.append(p)
+                    else:
+                        player_stats.append(self.__period_dict(pstat))
+                        pstat = []
+        # Zip the two lists together into a dictionary
+        return dict(zip(player_names, player_stats))
+
+    def load_shots(self):
+        td = [data for data in self.soup.find_all("td", {"width":"50%"})]
+        # 4 is visitor, 5 is home
+        table = [cell for cell in td[4].find_all("table")]
+        self.shots["away"] = self.__fill_shots_entity(table)
+        table = [cell for cell in td[5].find_all("table")]
+        self.shots["home"] = self.__fill_shots_entity(table)
