@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright © 2015 Jack Morton <jhm@jemscout.com>
+# Copyright © 2015-2016 Jack Morton <jhm@jemscout.com>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -29,37 +29,38 @@ do
   y=0$((i+1))
   dir="20${x: -2}-20${y: -2}"
 
-  echo -e "\n-> building directory tree for $dir"
-  mkdir -p $dir/roster $dir/summary $dir/events $dir/face-offs $dir/play \
-    $dir/shots $dir/toi $dir/toi/home $dir/toi/visitor
+  echo -e "\n-> building directory $dir"
+  mkdir $dir
 
-  echo "-> collecting documents"
+  echo -e "-> collecting documents"
   for p in {1..1230}
   do
     n=000$((p))
+    mkdir $dir/${n: -4}
+
     # roster
-    wget -P $dir/roster -nc -q \
+    wget -P $dir/${n: -4} -nc -q \
       "$docroot/20${x: -2}20${y: -2}/RO02${n: -4}.HTM" || continue
-    # summmary
-    wget -P $dir/summary -nc -q \
+    # summary
+    wget -P $dir/${n: -4} -nc -q \
       "$docroot/20${x: -2}20${y: -2}/GS02${n: -4}.HTM" || continue
     # events
-    wget -P $dir/events -nc -q \
+    wget -P $dir/${n: -4} -nc -q \
       "$docroot/20${x: -2}20${y: -2}/ES02${n: -4}.HTM" || continue
     # face-offs
-    wget -P $dir/face-offs -nc -q \
+    wget -P $dir/${n: -4} -nc -q \
       "$docroot/20${x: -2}20${y: -2}/FS02${n: -4}.HTM" || continue
     # play-by-plays
-    wget -P $dir/play -nc -q \
+    wget -P $dir/${n: -4} -nc -q \
       "$docroot/20${x: -2}20${y: -2}/PL02${n: -4}.HTM" || continue
     # shots
-    wget -P $dir/shots -nc -q \
+    wget -P $dir/${n: -4} -nc -q \
       "$docroot/20${x: -2}20${y: -2}/SS02${n: -4}.HTM" || continue
     # home team time-on-ice
-    wget -P $dir/toi/home -nc -q \
+    wget -P $dir/${n: -4} -nc -q \
       "$docroot/20${x: -2}20${y: -2}/TH02${n: -4}.HTM" || continue
     # visitor team time-on-ice
-    wget -P $dir/toi/visitor -nc -q  \
+    wget -P $dir/${n: -4} -nc -q \
       "$docroot/20${x: -2}20${y: -2}/TV02${n: -4}.HTM" || continue
     echo -n "."
   done

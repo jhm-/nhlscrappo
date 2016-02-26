@@ -54,7 +54,7 @@ class ReportFetcher(object):
             with open(url, "r") as handle:
                 html = handle.read()
                 handle.close()
-        return BeautifulSoup(html.decode("utf-8"))
+        return BeautifulSoup(html.decode("utf-8"), "lxml")
 
     def make_soup(self, local = None):
         if local:
