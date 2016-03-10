@@ -1,4 +1,4 @@
-# Copyright (c) 2015 Jack Morton <jhm@jemscout.com>
+# Copyright (c) 2015-2016 Jack Morton <jhm@jemscout.com>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -201,3 +201,31 @@ class ShotParser(ReportFetcher):
         self.shots["away"] = self.__fill_shots_entity(table)
         table = [cell for cell in td[5].find_all("table")]
         self.shots["home"] = self.__fill_shots_entity(table)
+
+
+class TOIParser(ReportFetcher):
+    """Parse the time-on-ice data"""
+
+    def __init__(self, season, game_num, game_type, report_type):
+        super(TOIParser, self).__init__(season, game_num, game_type, \
+            report_type)
+        self.players = {"name": {}}
+        """
+        Player time-on-ice statistics
+        {name: {period: {"shift", "start of shift", "end of shift", "event"}}}
+        """
+
+class HomeTOIParser(TOIParser):
+    """Parse the time-on-ice data for the home team and fill appropriate fields"""
+
+    def __init__(self, season, game_num, game_type):
+        super(HomeTOIParser, self).__init__(season, game_num, game_type, \
+            ReportType.HomeTOI)
+
+
+class VisitorTOIParser(TOIParser):
+    """Parse the time-on-ice-data for the visiting team and fill appropriate fields"""
+
+    def __init__(self, season, game_num, game_type):
+        super(VisitorTOIParser, self).__init__(season, game_num, game_type, \
+            ReportType.VisitorTOI)

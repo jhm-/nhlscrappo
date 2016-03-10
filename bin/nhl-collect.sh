@@ -39,7 +39,7 @@ do
     mkdir $dir/${n: -4}
 
     # roster
-    wget -P $dir/${n: -4} -nc -q \
+    wget -P $dir/${n: -4} -nc  \
       "$docroot/20${x: -2}20${y: -2}/RO02${n: -4}.HTM" || continue
     # summary
     wget -P $dir/${n: -4} -nc -q \
