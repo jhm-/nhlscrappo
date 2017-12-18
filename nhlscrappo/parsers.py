@@ -209,11 +209,41 @@ class TOIParser(ReportFetcher):
     def __init__(self, season, game_num, game_type, report_type):
         super(TOIParser, self).__init__(season, game_num, game_type, \
             report_type)
-        self.players = {"name": {}}
+        self.players = {}
         """
         Player time-on-ice statistics
         {name: {period: {"shift", "start of shift", "end of shift", "event"}}}
         """
+
+    def load_players(self):
+        players = []
+        borders = []
+        # The first list we generate is for the player names
+        td = [cell for cell in self.soup("td")]
+        for i in td:
+            if i.has_attr("class") and i["class"][0] == "playerHeading":
+                player_name = i.string.split(" ")[2] + " " + \
+                    i.string.split(" ")[1][:-1]
+                players.append(player_name)
+            if i.has_attr("class") and i["class"][0] == "lborder" \
+                and i["class"][2] == "bborder":
+                borders.append(i.string)
+        # Now generate the stats and insert the name and stats into self.players
+        shift = 0
+        p = 0
+        stats = {"1":[], "2":[], "3":[], "OT":[]}
+        x = 0
+        while x < len(borders):
+            if int(borders[x]) > shift:
+                stats[borders[x+1]].append([borders[x], borders[x+2].split(" ")[0], \
+                    borders[x+3].split(" ")[0], borders[x+5].replace(u"\xa0", u" ")])
+                shift += 1
+            else:
+                self.players[players[p]] = stats
+                stats = {"1": [], "2": [], "3":[], "OT":[]}
+                p += 1
+                shift = 0
+            x += 6
 
 class HomeTOIParser(TOIParser):
     """Parse the time-on-ice data for the home team and fill appropriate fields"""
@@ -221,7 +251,6 @@ class HomeTOIParser(TOIParser):
     def __init__(self, season, game_num, game_type):
         super(HomeTOIParser, self).__init__(season, game_num, game_type, \
             ReportType.HomeTOI)
-
 
 class VisitorTOIParser(TOIParser):
     """Parse the time-on-ice-data for the visiting team and fill appropriate fields"""
