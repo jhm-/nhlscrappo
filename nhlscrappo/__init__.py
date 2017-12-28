@@ -30,7 +30,7 @@ class ReportType(Enum):
     Plays = "PL"
     Shots = "SS"
     HomeTOI = "TH"
-    VisitorTOI = "TV"
+    AwayTOI = "TV"
 
 class GameType(Enum):
     Regular = 2

@@ -28,11 +28,14 @@ class RosterParser(ReportFetcher):
         super(RosterParser, self).__init__(season, game_num, game_type, \
             ReportType.Roster)
 
+        self.team = {}
+        """Home and away teams {home: team name, away: team name}"""
+
         self.rosters = {"home": {}, "away": {}}
-        """Player rosters {"home/away": {name: {"num", "pos"}}}"""
+        """Player rosters {"home/away": {name: [num, pos]}}"""
 
         self.scratches = {"home": {}, "away": {}}
-        """Healthy scratches {"home/away": {name: {"num", "pos"}}}"""
+        """Healthy scratches {"home/away": {name: [num, pos]}}"""
         
         self.coaches = {"home": {}, "away": {}}
         """Team coaches {"home/away": name}"""
@@ -50,6 +53,10 @@ class RosterParser(ReportFetcher):
                 # Remove Captain (C) and Assistant (A) adornments
                 name = li[2].split("(")[0].rstrip()
                 players[name] = stats
+
+    def load_teams(self):
+        # XXX: finish this!
+        pass
 
     def load_players(self):
         # The visitor team player table is the third table
@@ -127,7 +134,7 @@ class ShotParser(ReportFetcher):
         self.shots = {"away": {}, "home": {}}
         """
         Player shot summary statistics
-        {"home/away": {name: {period: {"EV", "PP", "SH", "TOT"}}}}
+        {"home/away": {name: {period: [EV, PP, SH, TOT]}}}
         """
 
     def __make_list(self, i):
@@ -204,15 +211,16 @@ class ShotParser(ReportFetcher):
 
 
 class TOIParser(ReportFetcher):
-    """Parse the time-on-ice data"""
+    """Parse the time-on-ice data and fill appropriate fields"""
 
     def __init__(self, season, game_num, game_type, report_type):
         super(TOIParser, self).__init__(season, game_num, game_type, \
             report_type)
+
         self.players = {}
         """
         Player time-on-ice statistics
-        {name: {period: {"shift", "start of shift", "end of shift", "event"}}}
+        {name: {period: [shift, start of shift, end of shift, event]}}
         """
 
     def load_players(self):
@@ -246,15 +254,64 @@ class TOIParser(ReportFetcher):
             x += 6
 
 class HomeTOIParser(TOIParser):
-    """Parse the time-on-ice data for the home team and fill appropriate fields"""
+    """Wrapper for TOIParser for the home team"""
 
     def __init__(self, season, game_num, game_type):
         super(HomeTOIParser, self).__init__(season, game_num, game_type, \
             ReportType.HomeTOI)
 
-class VisitorTOIParser(TOIParser):
-    """Parse the time-on-ice-data for the visiting team and fill appropriate fields"""
+class AwayTOIParser(TOIParser):
+    """Wrapper for TOIParser for the away team"""
 
     def __init__(self, season, game_num, game_type):
-        super(VisitorTOIParser, self).__init__(season, game_num, game_type, \
-            ReportType.VisitorTOI)
+        super(AwayTOIParser, self).__init__(season, game_num, game_type, \
+            ReportType.AwayTOI)
+
+class EventParser(ReportFetcher):
+    """Parse the events summary report and fill appropriate fields"""
+
+    def __init__(self, season, game_num, game_type):
+        super(EventParser, self).__init__(season, game_num, game_type, \
+            ReportType.Events)
+
+        self.events = {}
+        """
+        Game event summary statistics
+        {"home/away": {name: [G, A, P, +/-, PN, PIM, S, A/B, MS, HT, GV, TJ, \
+             BS, FW, FL]}}
+        """
+
+    def __fill_players_entity(self, n, tr):
+        p = 0
+        players_dict = {}
+        player_list = []
+        # Twenty players on a team
+        while p < 20:
+            td = [data for data in tr[n+p].find_all("td")]
+            player_name = td[2].string.split(" ")[1] + " " + \
+                td[2].string.split(" ")[0][:-1]
+            # Grab the first 6 values
+            i = 3
+            while i < 9:
+                player_list.append(td[i].string.replace(u"\xa0", u" "))
+                i += 1
+            # Grab the final 9 values
+            i = 15
+            while i < 24:
+                player_list.append(td[i].string.replace(u"\xa0", u" "))
+                i += 1
+            players_dict[player_name] = player_list
+            player_list = []
+            p += 1
+        return players_dict
+
+
+    def load_events(self):
+        tr = [cell for cell in self.soup("tr")]
+        for x, i in enumerate(tr):
+            if i.has_attr("class") and "evenColor" in i["class"]:
+               home = self.__fill_players_entity(x, tr)
+               break
+        away = self.__fill_players_entity(x+25, tr)
+        self.events["home"] = home
+        self.events["away"] = away
