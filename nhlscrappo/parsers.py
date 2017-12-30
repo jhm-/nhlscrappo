@@ -28,7 +28,7 @@ class RosterParser(ReportFetcher):
         super(RosterParser, self).__init__(season, game_num, game_type, \
             ReportType.Roster)
 
-        self.team = {}
+        self.teams = {}
         """Home and away teams {home: team name, away: team name}"""
 
         self.rosters = {"home": {}, "away": {}}
@@ -55,8 +55,9 @@ class RosterParser(ReportFetcher):
                 players[name] = stats
 
     def load_teams(self):
-        # XXX: finish this!
-        pass
+        teamHeading = self.soup.find_all("td", {"class":"teamHeading"})
+        self.teams["away"] = teamHeading[0].string
+        self.teams["home"] = teamHeading[1].string
 
     def load_players(self):
         # The visitor team player table is the third table
@@ -306,8 +307,8 @@ class EventParser(ReportFetcher):
         tr = [cell for cell in self.soup("tr")]
         for x, i in enumerate(tr):
             if i.has_attr("class") and "evenColor" in i["class"]:
-               home = self.__fill_players_entity(x, tr)
+               away = self.__fill_players_entity(x, tr)
                break
-        away = self.__fill_players_entity(x+25, tr)
+        home = self.__fill_players_entity(x+25, tr)
         self.events["home"] = home
         self.events["away"] = away
