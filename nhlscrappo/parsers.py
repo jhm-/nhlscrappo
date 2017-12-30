@@ -76,7 +76,7 @@ class RosterParser(ReportFetcher):
 
     def load_coaches(self):
         td = [data for data in self.soup.find_all("td", {"width":"50%"})]
-        # The coaches tables are the seventh and eigth tables
+        # The coaches tables are the seventh and eighth tables
         for i, cell in enumerate(td[6:8]):
             keys = ["home", "away"]
             tr = cell.find_all("tr")
@@ -291,15 +291,11 @@ class EventParser(ReportFetcher):
             player_name = td[2].string.split(" ")[1] + " " + \
                 td[2].string.split(" ")[0][:-1]
             # Grab the first 6 values
-            i = 3
-            while i < 9:
-                player_list.append(td[i].string.replace(u"\xa0", u" "))
-                i += 1
+            for i in td[3:9]:
+                player_list.append(i.string.replace(u"\xa0", u" "))
             # Grab the final 9 values
-            i = 15
-            while i < 24:
-                player_list.append(td[i].string.replace(u"\xa0", u" "))
-                i += 1
+            for i in td[15:24]:
+                player_list.append(i.string.replace(u"\xa0", u" "))
             players_dict[player_name] = player_list
             player_list = []
             p += 1
