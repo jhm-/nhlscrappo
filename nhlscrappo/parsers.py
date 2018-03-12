@@ -312,3 +312,19 @@ class EventParser(ReportFetcher):
         home = self.__fill_players_entity(x+25, tr)
         self.events["home"] = home
         self.events["away"] = away
+
+class PlayParser(ReportFetcher):
+    """Parse the play-by-play report for the game"""
+
+    def __init__(self, season, game_num, game_type):
+        super(PlayParser, self).__init__(season, game_num, game_type, \
+            ReportType.Plays)
+
+    def __team_name(self, team):
+        pass
+
+    def __sort_play(self, play_data):
+        pass
+
+    def load_plays(self):
+        pass 

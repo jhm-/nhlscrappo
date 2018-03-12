@@ -23,7 +23,7 @@
 MIN_SEASON = 2007
 """Oldest season currently supported"""
 
-MAX_SEASON = 2014
+MAX_SEASON = 2016
 """Most recent season supported. Seasons are denoted by the starting year."""
 
 GAME_CT_DICT = {
@@ -34,7 +34,9 @@ GAME_CT_DICT = {
   2011: 1230,
   2012: 1230,
   2013: 720,
-  2014: 1230
+  2014: 1230,
+  2015: 1230,
+  2016: 1230
 }
 
 MISS_REG_GAMES = [
@@ -256,6 +258,7 @@ TEAMS_BY_ABBR = {
   'TRA': 'Toronto Arenas', # (1917-18 - 1918-19)
   'TRS': 'Toronto St Pats', # (1919-20 - 1925-26)
   'VAN': 'Vancouver Canucks', # (1970-71 - present)
+  'VGK': 'Vegas Golden Knights', # (2017-18 - present)
   'WSH': 'Washington Capitals', # (1974-75 - present)
   'WIJ': 'Winnipeg Jets', # (1st) (1979-80 - 1995-96)
   'WIN': 'Winnipeg Jets', # (2011-12 - present)

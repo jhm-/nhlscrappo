@@ -35,3 +35,26 @@ class ReportType(Enum):
 class GameType(Enum):
     Regular = 2
     Playoff = 3
+
+class PlayType(Enum):
+    Shot = "SHOT"
+    Goal = "GOAL"
+    BlockedShot = "BLOCK"
+    MissedShot = "MISS"
+    Hit = "HIT"
+    Faceoff = "FAC"
+    Giveaway = "GIVE"
+    Takeaway = "TAKE"
+    Penalty = "PENL"
+    Stoppage = "STOP"
+    PeriodStart = "PSTR"
+    PeriodEnd = "PEND"
+    ShootoutEnd = "SOC"
+    GameEnd = "GEND"
+
+class PlayerStrength
+    Even = "EV"
+    PowerPlay = "PP"
+    Shorthand = "SH"
+    
+    
