@@ -52,9 +52,7 @@ class PlayType(Enum):
     ShootoutEnd = "SOC"
     GameEnd = "GEND"
 
-class PlayerStrength
+class PlayerStrength(Enum):
     Even = "EV"
     PowerPlay = "PP"
     Shorthand = "SH"
-    
-    
