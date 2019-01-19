@@ -319,12 +319,35 @@ class PlayParser(ReportFetcher):
     def __init__(self, season, game_num, game_type):
         super(PlayParser, self).__init__(season, game_num, game_type, \
             ReportType.Plays)
+        self.plays = []
+        """
+        Play-by-play data
+        [event number, period, strength, elapsed time, event code, \
+         description, [[visitor jersey number, visitor position]], \
+         [[home jersey number, home jersey position]]]
+        """
 
-    def __team_name(self, team):
-        pass
-
-    def __sort_play(self, play_data):
-        pass
+    def __fill_on_ice(self, td):
+        on_ice = []
+        center = [data for data in td.find_all("td", {"align":"center"})]
+        for h, i in enumerate(center):
+            centwo = [cell for cell in i.find_all("td")]
+            if h % 4 == 0:
+                on_ice.append([centwo[0].find("font").string, centwo[1].string])
+        return on_ice
 
     def load_plays(self):
-        pass 
+        evenColor = [data for data in self.soup.find_all("tr", {"class":"evenColor"})]
+        for h, i in enumerate(evenColor):
+            td = [cell for cell in i.find_all("td")]
+            play = []
+            for j, k in enumerate(td):
+                if k.has_attr("class") and k["class"][2] == "bborder":
+                    # if j == 3 then process the elapsed time
+                    if j == 3:
+                        play.append(k.contents[0])
+                    if k.string is not None:
+                        play.append(k.string.replace(u"\xa0", u" "))
+                    if j == 6 or j == 30:
+                        play.append(self.__fill_on_ice(k))
+            self.plays.append(play)
