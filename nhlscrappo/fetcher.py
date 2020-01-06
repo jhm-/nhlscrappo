@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2016 Jack Morton <jhm@jemscout.com>
+# Copyright (c) 2015-2019 Jack Morton <jhm@jemscout.com>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -89,15 +89,16 @@ class ReportFetcher(object):
             with urlopen(req) as handle:
                 html = handle.read()
                 handle.close()
+                return BeautifulSoup(html.decode("utf-8", "lxml"))
         else:
             with open(url, "r") as handle:
                 html = handle.read()
                 handle.close()
-        return BeautifulSoup(html.decode("utf-8"), "lxml")
+                return BeautifulSoup(html, features="lxml")
 
     def make_soup(self, local = None):
         if local:
-            soup = self.__load_html(local)
+            self.soup = self.__load_html(local)
         else:
             url = self.__docroot + "scores/htmlreports/" + str(self.season) + \
                 str(self.season + 1) + "/" + self.report_type.value + "0" + \

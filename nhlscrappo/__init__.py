@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2016 Jack Morton <jhm@jemscout.com>
+# Copyright (c) 2015-2019 Jack Morton <jhm@jemscout.com>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,7 @@
 
 from enum import Enum
 
-__version__ = "0.1.0-alpha"
+__version__ = "0.2.0-alpha"
 
 class ReportType(Enum):
     Summary = "GS"

@@ -1,4 +1,4 @@
-# Copyright (c) 2015 Jack Morton <jhm@jemscout.com>
+# Copyright (c) 2015-2019 Jack Morton <jhm@jemscout.com>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@
 MIN_SEASON = 2007
 """Oldest season currently supported"""
 
-MAX_SEASON = 2016
+MAX_SEASON = 2018
 """Most recent season supported. Seasons are denoted by the starting year."""
 
 GAME_CT_DICT = {
@@ -36,7 +36,9 @@ GAME_CT_DICT = {
   2013: 720,
   2014: 1230,
   2015: 1230,
-  2016: 1230
+  2016: 1230,
+  2017: 1271,
+  2018: 1271
 }
 
 MISS_REG_GAMES = [

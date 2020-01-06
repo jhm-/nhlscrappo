@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2016 Jack Morton <jhm@jemscout.com>
+# Copyright (c) 2015-2019 Jack Morton <jhm@jemscout.com>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -47,7 +47,7 @@ class RosterParser(ReportFetcher):
         tr = td.find_all("tr")
         for data in tr:
             td = data.find_all("td")
-            if td[0].attrs["class"] and "heading" not in td[0].attrs["class"]:
+            if "heading" not in td[0].attrs["class"]:
                 li = [item.string for item in td]
                 stats = {"num":li[0], "pos":li[1]}
                 # Remove Captain (C) and Assistant (A) adornments
@@ -79,7 +79,7 @@ class RosterParser(ReportFetcher):
         td = [data for data in self.soup.find_all("td", {"width":"50%"})]
         # The coaches tables are the seventh and eighth tables
         for i, cell in enumerate(td[6:8]):
-            keys = ["home", "away"]
+            keys = ["away", "home"]
             tr = cell.find_all("tr")
             self.coaches[keys[i]] = tr[0].find("td").string
 
@@ -105,7 +105,7 @@ class RosterParser(ReportFetcher):
             if num in d:
                 num = max(d.keys() + 1)
             d[num] = name
-            return d
+        return d
 
     def load_officials(self):
         td = [data for data in self.soup.find_all("td", {"width":"100%"})]
